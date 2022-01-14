@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Login</title>
+</head>
+
+<body>
+
+    <div class="containner">
+
+        <div class="page-title">
+            <h1>Blog</h1>
+            <p>Encontre a resposta para sua pergunta</p>
+        </div>
+
+        <form action="" class="form-initial">
+            <div class="button-wrapper">
+                <button id="do-login">Fazer login</button>
+                <button id="do-cadastro">Cadastro</button>
+            </div>
+            <div class="login">
+                <div class="icon-input">
+                    <i class="fas fa-user"></i><input name="email-login" type="email" id="email-login"
+                        placeholder="Email" required>
+
+                </div>
+                <div class="icon-input">
+                    <i class="fas fa-lock"></i><input name="senha-login" type="password" id="senha-login"
+                        placeholder="Senha" required>
+                </div>
+            </div>
+            <div class="cadastro">
+                <div class="icon-input">
+                    <i class="fas fa-user"></i><input name="nome" type="text" id="nome" placeholder="Nome" required>
+                </div>
+                <div class="icon-input">
+                    <i class="fas fa-envelope"></i><input name="email-cadastro" type="email" id="email-cadastro"
+                        placeholder="Email" required>
+                </div>
+                <div class="icon-input">
+                    <i class="fas fa-lock"></i><input name="senha-cadastro" type="password" id="senha-cadastro"
+                        placeholder="Senha" required>
+                </div>
+            </div>
+            <div class="button-submit">
+                <button type="submit" id="submit">Enviar</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://kit.fontawesome.com/dfba0321b6.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        let tipoForm = "login"
+
+        const elementoCadastro = document.getElementsByClassName("cadastro")[0]
+        const elementoLogin = document.getElementsByClassName("login")[0]
+
+        document.getElementById("do-login").addEventListener("click", () => {
+            elementoLogin.style.display = "block"
+            elementoCadastro.style.display = "none"
+            tipoForm = "login"
+        })
+        document.getElementById("do-cadastro").addEventListener("click", () => {
+            elementoLogin.style.display = "none"
+            elementoCadastro.style.display = "block"
+            tipoForm = "cadastro"
+        })
+
+        document.getElementById("submit").addEventListener("click", (e) => {
+            e.preventDefault()
+            let dados = {}
+            if (tipoForm == "cadastro") {
+
+                dados["email"] = (document.getElementById("email-cadastro").value).toLowerCase()
+                dados["nome"] = document.getElementById("nome").value
+                dados["senha"] = document.getElementById("senha-cadastro").value
+
+                axios({
+                    method: "post",
+                    url: "http://localhost:3003/logar",
+                    data: dados
+                }).then(rsp => {
+                    if (rsp.status == 200) {
+                        if (rsp.data[0] == "presente") {
+                            alert("O usuário já existe no sistema")
+                        } else if (rsp.data[0] == "ausente") {
+                            dados = JSON.stringify(dados)
+                            const dados_locais = localStorage.setItem("usuario", dados)
+
+                            setTimeout(() => {
+                                window.location.href = "/autenticacao.html"
+                            }, 1500)
+                        }
+                    }
+                })
+
+            }
+            else if (tipoForm == "login") {
+
+                dados["email"] = document.getElementById("email-login").value
+                dados["senha"] = document.getElementById("senha-login").value
+
+                axios({
+                    method: "post",
+                    url: "http://localhost:3003/logar",
+                    data: dados
+                }).then(rsp => {
+                    if (rsp.status == 200) {
+                        if (rsp.data[0] == "presente") {
+                            if (rsp.data[1]["senha"] == dados["senha"]){
+                                setTimeout(() => {
+                                    window.location.href = "http://localhost:3003/home.html"
+                                }, 1000)
+                            }else{
+                                alert("Senha Incorreta")
+                            }
+                        } else if (rsp.data[0] == "ausente") {
+                            alert("Sua conta não existe no sistema!")
+                        }
+                    }
+                })
+            }
+
+
+        })
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticação</title>
+</head>
+
+<body>
+    <div class="conteiner">
+        <form>
+            <label for="codigo">Digite o código enviado para seu E-mail</label>
+            <input type="text" name="codigo" id="codigo">
+            <button id="submit" type="submit">Verificar</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script>
+
+        function enviarEmail(obj, code) {
+            Email.send({
+                Host: "smtp.gmail.com",
+                Username: "pyprojetos123@gmail.com",
+                Password: "olamundo",
+                From: "pyprojetos123@gmail.com",
+                To: obj["email"],
+                Subject: "Confirmação de E-mail",
+                Body: `<p>Olá, <b>${obj["nome"]}</b>!</p>
+                        <p>Seu código de verificação é ${code}</p>`,
+            }).then(
+                message => console.log("Enviado!")
+            )
+        }
+
+        function gerarCodigo() {
+            const pwdChars = "-#@%&*$!/:.,0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            const pwdLen = 8;
+            const randPassword = Array(pwdLen).fill(pwdChars).map(function (x) { return x[Math.floor(Math.random() * x.length)] }).join('');
+
+            return randPassword
+        }
+        const code = gerarCodigo()
+
+        obj = JSON.parse(localStorage.getItem("usuario"))
+        console.log(obj)
+
+        enviarEmail(obj, code)
+
+        document.getElementById("submit").onclick = (event) => {
+            event.preventDefault()
+            valor_input = document.getElementById("codigo").value
+
+            if (valor_input == code) {
+                axios({
+                    method: "post", 
+                    url: "http://localhost:3003/cadastrar",
+                    data: obj
+                }).then(rsp => {
+                    console.log(rsp)
+                })  
+                setTimeout(() => {
+                    window.location.href = "http://localhost:3003/home.html"
+                }, 1500)
+            } else {
+                alert("Código Incorreto!")
+            }
+        }
+
+    </script>
+</body>
+
+</html>
